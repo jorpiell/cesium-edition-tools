@@ -27,17 +27,29 @@
 <script>
     var viewer = new Cesium.Viewer('cesiumContainer');
 
-    require(['tools/EditionTools'],
+    // Initialize the edition tools and add the default tools
+    require(['EditionTools'],
         function(EditionTools) {
-            var editionTools = new EditionTools('editionToolBar', viewer);
+            var editionTools = EditionTools.getInstance();
+            editionTools.initialize(viewer);
+            editionTools.addDefaultTools();
         }
     );
 
+    // Add the tool bar
+    require(['toolbar/ToolBarUI'],
+        function(ToolBarUI) {
+            var toolbarUI = new ToolBarUI('editionToolBar');
+        }
+    );
+
+    // Add the command stack
     require(['stack/CommandStackUI'],
         function(CommandStackUI) {
             var commandStackUI = new CommandStackUI('commandStack');
         }
     );
+
 </script>
 </body>
 </html>
