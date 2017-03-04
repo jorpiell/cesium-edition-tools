@@ -1,0 +1,45 @@
+#editionToolBar {
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    z-index: 1;
+    background: white;
+    //-webkit-transform-origin: top left;
+    //-webkit-transform: rotate(90deg);
+
+}
+
+#editionToolBar > .toolBarButton {
+    margin: 5px;
+    padding: 5px;
+    border: 1px solid #eee;
+    cursor: pointer;
+}
+
+#editionToolBar > .toolBarButton:hover {
+    background: #eee;
+}
+
+#commandStack {
+    position: absolute;
+    left: 0px;
+    top: 200px;
+    z-index: 1;
+    background: white;
+}
+
+#commandStack > .commandsSlider {
+    -webkit-appearance: none;
+    height: 1px;
+    border: solid rgba(0,0,0,0.3) 1px;
+    border-bottom: solid rgba(0,0,0,0.5) 1px;
+    border-left: solid rgba(0,0,0,0.5) 1px;
+    -webkit-transform: rotate(90deg);
+    -webkit-transform-origin: top left;
+    margin-left: 10px;
+}
+
+#commandStack > .commandsTable {
+    margin-left: 20px;
+    height: 200px;
+}
