@@ -2,6 +2,7 @@
 /*global define, console, document, window, navigator */
 define([
     'CommandStatus',
+    'knockout',
     'stack/CommandStack',
     'tools/InsertLineTool',
     'tools/InsertPointTool',
@@ -9,6 +10,7 @@ define([
     'tools/ToolHelper'
 ], function (
     CommandStatus,
+    ko,
     CommandStack,
     InsertLineTool,
     InsertPointTool,
@@ -17,13 +19,27 @@ define([
 ) {
     'use strict';
 
-    var EditionTools = function (toolBarContainerName, viewer) {
+    var EditionTools = function () {
+        this.tools = ko.observableArray();
+    };
+
+    var instance;
+
+    EditionTools.getInstance = function() {
+        if (instance === undefined) {
+            instance = new EditionTools()
+        }
+        return instance;
+    };
+
+    EditionTools.prototype.initialize = function(viewer) {
         this.viewer = viewer;
         this.selectedTool = null;
         this.clicksNumber = 0;
         this.commandStack = CommandStack.getInstance();
+        this.toolHelper = new ToolHelper(this.viewer);
 
-        this.addTools(document.getElementById(toolBarContainerName));
+        //this.addTools(document.getElementById(toolBarContainerName));
         this.addMouseEvents();
     };
 
@@ -45,43 +61,18 @@ define([
     };
 
     /**
-     * Add the tools to the tool br container
-     * @param toolBarContainer the tool bar container
+     * Adds the default set of tools
      */
-    EditionTools.prototype.addTools = function(toolBarContainer) {
-        var toolHelper = new ToolHelper(this.viewer);
-
-        this.addTool(toolBarContainer, new InsertPointTool(this.viewer, toolHelper));
-        this.addTool(toolBarContainer, new InsertLineTool(this.viewer, toolHelper));
-        this.addTool(toolBarContainer, new InsertPolygonTool(this.viewer, toolHelper));
+    EditionTools.prototype.addDefaultTools = function() {
+         this.tools.push(new InsertPointTool(this.viewer, this.toolHelper));
+         this.tools.push(new InsertLineTool(this.viewer, this.toolHelper));
+         this.tools.push(new InsertPolygonTool(this.viewer, this.toolHelper));
     };
 
-    /**
-     * Add a tool to the toolbar
-     * @param toolBarContainer the tool bar contgainer
-     * @param tool the tool to add
-     */
-    EditionTools.prototype.addTool = function(toolBarContainer, tool) {
-        var self = this,
-            button = document.createElement("div");
-
-        button.className = "toolBarButton";
-        button.title = tool.getToolTip();
-        button.onclick = function() {
-            self.selectedTool = tool;
-            self.clicksNumber = 0;
-            self.selectedTool.selectTool();
-        };
-
-        // Add the image
-        var span = document.createElement('span');
-        button.appendChild(span);
-        var image = document.createElement('img');
-        image.src = tool.getImage();
-        span.appendChild(image);
-
-        //Append the button to the toolbar
-        toolBarContainer.appendChild(button);
+    EditionTools.prototype.selectTool = function(tool) {
+        this.selectedTool = tool;
+        this.clicksNumber = 0;
+        this.selectedTool.selectTool();
     };
 
     EditionTools.prototype.checkActionReply = function(command) {
