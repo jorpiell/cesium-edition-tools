@@ -26,10 +26,11 @@ define([
         return "Insert line";
     };
 
-    InsertLineTool.prototype.selectTool = function() {
+    InsertLineTool.prototype.selectTool = function(layer) {
         console.log("Adding line");
+        this.layer = layer;
 
-        this.entity = this.toolHelper.addNewPolyline();
+        this.entity = this.toolHelper.addNewPolyline(layer);
         this.positions = this.entity.polyline.positions.positions;
 
         // enable the Pointer
@@ -58,15 +59,10 @@ define([
         }
     };
 
-    InsertLineTool.prototype.mouseLeftDown = function(position) {
-        return {
-            status: CommandStatus.CONTINUE
-        }
-    };
-
     InsertLineTool.prototype.mouseLeftDoubleClick = function(position) {
         var entity = this.entity,
             self = this,
+            layer = self.layer,
             positions = this.entity.polyline.positions.positions;
 
         this.entity = null;
@@ -77,10 +73,10 @@ define([
             status: CommandStatus.DONE,
             name: "Insert polyline",
             undo: function() {
-                self.viewer.entities.remove(entity);
+                layer.remove(entity);
             },
             redo: function() {
-                self.viewer.entities.add(entity);
+                layer.add(entity);
             },
             highlight: function() {
                 this.highlightedEntity = self.toolHelper.addNewHighlightedPolyline(positions);

@@ -32,8 +32,8 @@ define([
         this.pointer.position = position;
     };
 
-    ToolHelper.prototype.addNewPoint = function () {
-        return this.viewer.entities.add({
+    ToolHelper.prototype.addNewPoint = function (layer) {
+        return layer.add({
             point : {
                 pixelSize : 10,
                 color : ToolHelper.NEW_GEOMETRY_COLOR
@@ -53,7 +53,7 @@ define([
         });
     };
 
-    ToolHelper.prototype.addNewPolyline = function() {
+    ToolHelper.prototype.addNewPolyline = function(layer) {
         var pointPositions = new Cesium.CallbackProperty(
             function () {
                 return this.positions;
@@ -62,7 +62,7 @@ define([
         );
         pointPositions.positions = [];
 
-        return this.viewer.entities.add({
+        return layer.add({
             polyline: {
                 positions: pointPositions,
                 width : 2,
@@ -85,7 +85,7 @@ define([
         });
     };
 
-    ToolHelper.prototype.addNewPolygon = function() {
+    ToolHelper.prototype.addNewPolygon = function(layer) {
         var pointPositions = new Cesium.CallbackProperty(
             function () {
                 return this.positions;
@@ -94,7 +94,7 @@ define([
         );
         pointPositions.positions = [];
 
-        return this.viewer.entities.add({
+        return layer.add({
             polygon: {
                 hierarchy: pointPositions,
                 width : 2,
@@ -103,15 +103,15 @@ define([
         });
     };
 
-    ToolHelper.prototype.addNewPolygonFromPolyline = function(oldEntity) {
+    ToolHelper.prototype.addNewPolygonFromPolyline = function(oldEntity, layer) {
         var newEntity,
             i;
 
         // Remove the line
-        this.viewer.entities.remove(oldEntity);
+        layer.remove(oldEntity);
 
         // Add the polygon
-        newEntity = this.addNewPolygon();
+        newEntity = this.addNewPolygon(layer);
 
         // Copy the geometries
         for (i=0 ; i<=1 ; i++) {

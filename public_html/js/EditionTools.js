@@ -3,15 +3,19 @@
 define([
     'CommandStatus',
     'knockout',
+    'model/Layer',
     'stack/CommandStack',
-    'tools/InsertLineTool',
-    'tools/InsertPointTool',
-    'tools/InsertPolygonTool',
+    'tools/export/ExportToKMLTool',
+    'tools/insert/InsertLineTool',
+    'tools/insert/InsertPointTool',
+    'tools/insert/InsertPolygonTool',
     'tools/ToolHelper'
 ], function (
     CommandStatus,
     ko,
+    Layer,
     CommandStack,
+    ExportToKMLTool,
     InsertLineTool,
     InsertPointTool,
     InsertPolygonTool,
@@ -23,15 +27,23 @@ define([
         this.tools = ko.observableArray();
     };
 
-    var instance;
+    var instance = null;
 
+    /**
+     * Gest the singlenton's instance
+     * @returns {*}
+     */
     EditionTools.getInstance = function() {
-        if (instance === undefined) {
+        if (instance === null) {
             instance = new EditionTools()
         }
         return instance;
     };
 
+    /**
+     * Initialize the singleton. It needs the Cesium's viewer
+     * @param viewer the viewer
+     */
     EditionTools.prototype.initialize = function(viewer) {
         this.viewer = viewer;
         this.selectedTool = null;
@@ -39,10 +51,16 @@ define([
         this.commandStack = CommandStack.getInstance();
         this.toolHelper = new ToolHelper(this.viewer);
 
+        // In this first version, create just one layer
+        this.layer = new Layer(viewer);
+
         //this.addTools(document.getElementById(toolBarContainerName));
         this.addMouseEvents();
     };
 
+    /**
+     * Add the managed mouse events
+     */
     EditionTools.prototype.addMouseEvents = function() {
         var self = this;
 
@@ -67,14 +85,23 @@ define([
          this.tools.push(new InsertPointTool(this.viewer, this.toolHelper));
          this.tools.push(new InsertLineTool(this.viewer, this.toolHelper));
          this.tools.push(new InsertPolygonTool(this.viewer, this.toolHelper));
+         this.tools.push(new ExportToKMLTool(this.viewer));
     };
 
+    /**
+     * Select the current tool
+     * @param tool the tool to select
+     */
     EditionTools.prototype.selectTool = function(tool) {
         this.selectedTool = tool;
         this.clicksNumber = 0;
-        this.selectedTool.selectTool();
+        this.selectedTool.selectTool(this.layer);
     };
 
+    /**
+     * Checks the reply of a tool and takes an action if necessary
+     * @param command the returned command
+     */
     EditionTools.prototype.checkActionReply = function(command) {
         if (command.status === CommandStatus.DONE) {
             this.selectedTool = null;
@@ -82,11 +109,15 @@ define([
         }
     };
 
+    /**
+     * Manage the mouse move event
+     * @param event the mouse event
+     */
     EditionTools.prototype.mouseMove = function(event) {
         var ray,
             position;
 
-        if (this.selectedTool === null) {
+        if (this.selectedTool === null || this.selectedTool.mouseMove === undefined) {
             return;
         }
 
@@ -96,11 +127,15 @@ define([
         this.checkActionReply(this.selectedTool.mouseMove(position));
     };
 
+    /**
+     * Manage the mouse left click event
+     * @param event the mouse event
+     */
     EditionTools.prototype.mouseLeftClick = function(event) {
         var ray,
             position;
 
-        if (this.selectedTool === null) {
+        if (this.selectedTool === null || this.selectedTool.mouseLeftClick === undefined) {
             return;
         }
 
@@ -111,11 +146,15 @@ define([
         this.checkActionReply(this.selectedTool.mouseLeftClick(position, this.clicksNumber));
     };
 
+    /**
+     * Manage the mouse left down event
+     * @param event the mouse event
+     */
     EditionTools.prototype.mouseLeftDown = function(event) {
         var ray,
             position;
 
-        if (this.selectedTool === null) {
+        if (this.selectedTool === null || this.selectedTool.mouseLeftDown === undefined) {
             return;
         }
 
@@ -125,11 +164,15 @@ define([
         this.checkActionReply(this.selectedTool.mouseLeftDown(position));
     };
 
+    /**
+     * Manage the mouse double click event
+     * @param event the mouse event
+     */
     EditionTools.prototype.mouseLeftDoubleClick = function(event) {
         var ray,
             position;
 
-        if (this.selectedTool === null) {
+        if (this.selectedTool === null || this.selectedTool.mouseLeftDoubleClick === undefined) {
             return;
         }
 

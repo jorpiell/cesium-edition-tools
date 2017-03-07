@@ -26,10 +26,11 @@ define([
         return "Insert polygon";
     };
 
-    InsertPolygonTool.prototype.selectTool = function() {
+    InsertPolygonTool.prototype.selectTool = function(layer) {
         console.log("Adding polygon");
+        this.layer = layer;
 
-        this.entity = this.toolHelper.addNewPolyline();
+        this.entity = this.toolHelper.addNewPolyline(layer);
         this.positions = this.entity.polyline.positions.positions;
 
         // enable the Pointer
@@ -56,7 +57,7 @@ define([
         }
         if (clicksNumber === 2) {
             // Add the polygon
-            this.entity = this.toolHelper.addNewPolygonFromPolyline(this.entity);
+            this.entity = this.toolHelper.addNewPolygonFromPolyline(this.entity, this.layer);
             this.positions = this.entity.polygon.hierarchy.positions;
             this.positions.push(this.positions[0]);
         }
@@ -66,15 +67,10 @@ define([
         }
     };
 
-    InsertPolygonTool.prototype.mouseLeftDown = function(position) {
-        return {
-            status: CommandStatus.CONTINUE
-        }
-    };
-
     InsertPolygonTool.prototype.mouseLeftDoubleClick = function(position) {
         var entity = this.entity,
             self = this,
+            layer = self.layer,
             positions = this.entity.polygon.hierarchy.positions;
 
         this.entity = null;
@@ -85,10 +81,10 @@ define([
             status: CommandStatus.DONE,
             name: "Insert polygon",
             undo: function() {
-                self.viewer.entities.remove(entity);
+                layer.remove(entity);
             },
             redo: function() {
-                self.viewer.entities.add(entity);
+                layer.add(entity);
             },
             highlight: function() {
                 this.highlightedEntity = self.toolHelper.addNewHighlightedPolygon(positions);

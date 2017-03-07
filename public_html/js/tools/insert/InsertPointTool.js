@@ -21,9 +21,10 @@ define([
         return "Insert point";
     };
 
-    InsertPointTool.prototype.selectTool = function() {
+    InsertPointTool.prototype.selectTool = function(layer) {
         console.log("Adding point");
-        this.entity = this.toolHelper.addNewPoint();
+        this.layer = layer;
+        this.entity = this.toolHelper.addNewPoint(layer);
 
         // enable the Pointer
         this.toolHelper.addPointer();
@@ -39,7 +40,8 @@ define([
 
     InsertPointTool.prototype.mouseLeftClick = function(position, clicksNumber) {
         var entity = this.entity,
-            self = this;
+            self = this,
+            layer = self.layer;
 
         this.entity = null;
         this.toolHelper.removePointer();
@@ -47,10 +49,10 @@ define([
             status: CommandStatus.DONE,
             name: "Insert point",
             undo: function() {
-                self.viewer.entities.remove(entity);
+                layer.remove(entity);
             },
             redo: function() {
-                self.viewer.entities.add(entity);
+                layer.add(entity);
             },
             highlight: function() {
                 this.highlightedEntity = self.toolHelper.addNewHighlightedPoint(entity.position);
@@ -60,13 +62,6 @@ define([
             }
         }
     };
-
-    InsertPointTool.prototype.mouseLeftDown = function(position) {
-        return {
-            status: CommandStatus.CONTINUE
-        }
-    };
-
 
     return InsertPointTool;
 });
